@@ -17,7 +17,7 @@ Feature: Core Use
 		"""
 		And I import "Todo" from models
 
-	Scenario: Basic data manipulation
+	Scenario: I can save a simple single-value object
 		When I create a new "Todo" as "todo" with args
 		"""
 		{

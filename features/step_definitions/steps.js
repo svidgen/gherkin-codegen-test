@@ -4,11 +4,6 @@ const { defineParameterType, After, Before, Given, When, Then } = require('@cucu
  * to import from PLATFORM scope
  */
 
-const PLATFORM = 'js';
-
-function emit(code) {
-	console.log(code);
-}
 
 // TODO: change to varname or something
 function normalize(name) {
@@ -78,7 +73,7 @@ Given("a new client schema", schema_graphql => {
 Given("I import {string} from models", model => {
 	switch (PLATFORM) {
 		case 'js':
-			emit(`import { ${model} } from './models';`);
+			emit(`const { ${model} } = require('./models');`);
 			break;
 		case 'ios':
 			emit(`import ios: ${model}`);
@@ -95,7 +90,7 @@ When("I create a new {string} as {string} with args", (model, varname, json) => 
 
 When("I save {string} with return value {string}", (obj, varname) => {
 	// js version
-	emit(`const ${normalize(varname)} = await DataStore.save(${obj})`);
+	emit(`const ${normalize(varname)} = await DataStore.save(${obj});`);
 });
 
 Then("{string} should have {string}", (varname, fieldname) => {
@@ -108,3 +103,6 @@ Then("{string} field {string} should equal", (varname, fieldname, json) => {
 	emit(`expect(${normalize(varname)}.${fieldname}).toEqual(${json});`);
 });
 
+Then("nothing is on fire", () => {
+	throw new Error("Not yet defined");
+});
