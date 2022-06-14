@@ -4,12 +4,16 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-	"build": "node run.js",
+    "build": "node run.js",
     "test": "cucumber-js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@cucumber/cucumber": "^8.2.2"
+    "@cucumber/cucumber": "^8.2.2",
+    "@graphql-codegen/core": "^2.5.1",
+    "amplify-codegen": "^3.0.0",
+    "graphql": "^14.7.0",
+    "prettier": "^2.6.2"
   }
 }

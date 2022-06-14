@@ -67,12 +67,15 @@ Given("a clean client database", () => {
 });
 
 Given("a new client schema", schema_graphql => {
-	emit('just testing:\n' + schema_graphql);
+	// emit('just testing:\n' + schema_graphql);
+	emit('// schema.json and models go here.');
+	emit(codegen(schema_graphql));
 });
 
 Given("I import {string} from models", model => {
 	switch (PLATFORM) {
 		case 'js':
+			emit('// might not even have to do this if we emit schema info inline ^^');
 			emit(`const { ${model} } = require('./models');`);
 			break;
 		case 'ios':
