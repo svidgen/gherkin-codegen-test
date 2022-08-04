@@ -8,7 +8,7 @@ I am perhaps perversely playing with the idea of using gherkin (cucumber) as a m
 yarn && yarn test
 ```
 
-For now, this just assumes `js` is the `PLATFORM` and it `console.log`'s the sample case.
+For now, this just assumes `js` is the `PLATFORM` and it outputs to `dist/`.
 
 To really get this moving, we probably want a `build` command that generates code for each platform. And we may *then* want a `publish` command to:
 
