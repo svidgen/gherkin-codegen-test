@@ -1,5 +1,5 @@
 Feature: Core Use
-	The basic DataStore usage.
+	Basic DataStore usage.
 
 	Scenarios and features tagged with `@unstable` are still in the implementation stage,
 	and are not considered stable yet. Feel free to use them, but DO NOT expect cross-platform

@@ -69,7 +69,7 @@ Given("a clean client database", () => {
 Given("a new client schema", schema_graphql => {
 	// emit('just testing:\n' + schema_graphql);
 	emit('// schema.json and models go here.');
-	emit(codegen(schema_graphql));
+	// emit(codegen(schema_graphql));
 });
 
 Given("I import {string} from models", model => {

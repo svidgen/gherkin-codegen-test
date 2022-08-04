@@ -1,15 +1,19 @@
 // https://github.com/cucumber/cucumber-js/blob/ad1d11267d03cce9b98a9af27de99a93615ffcf5/docs/javascript_api.md
 
 const { loadConfiguration, loadSupport, runCucumber } = require('@cucumber/cucumber/api');
+const prettier = require("prettier");
+const fs = require('fs');
+const path = require('path');
+const rimraf = require('rimraf');
 
-const { parse } = require('graphql');
+const OUTPUT_PATH = 'dist';
+
+// const { parse } = require('graphql');
 
 // const codegen = require('amplify-codegen');
 // const generateModels = require('amplify-codegen/commands/models');
 // const mockFs = require('mock-fs');
 // const graphqlCodegen = require('@graphql-codegen/core');
-// const fs = require('fs');
-// const path = require('path');
 
 
 /*
@@ -23,6 +27,7 @@ export declare class PostCustomPKSort {
 }
 */
 
+/*
 function codegen(graphql) {
 	// return JSON.stringify(parse(graphql), null, 2);
 	const definitions = parse(graphql).definitions;
@@ -38,10 +43,14 @@ function codegen(graphql) {
 		};
 	}), null, 2);
 }
+*/
 
 
-console.log('codegen keys', Object.keys(codegen));
+// console.log('codegen keys', Object.keys(codegen));
 
+
+// TODO: `platform` should be a `Target` or `Output` object that can be added to the
+// scope exposed to cucumber tests -- so sneak helper methods in if needed.
 async function runTests({ platform }) {
 	// things we need to specify about the environment
 	const environment = {
@@ -49,9 +58,10 @@ async function runTests({ platform }) {
 
 	const lines = [];
 
-	global.codegen = codegen;
+	// global.codegen = codegen;
 
-	global.PLATFORM = 'js';
+	// not sure how else to ferry things into the cucumber execution context from here.
+	global.PLATFORM = platform.name;
 	global.emit = function(line) {
 		lines.push(line);
 	};
@@ -70,10 +80,35 @@ async function runTests({ platform }) {
 	return { success, lines };
 }
 
-for (const platform of ['js']) {
+const platforms = {
+	js: {
+		name: 'js',
+		format: code => prettier.format(code, { parser: "babel" }),
+		fileExtension: 'js'
+	}
+};
+
+rimraf.sync(OUTPUT_PATH);
+if (!fs.existsSync(OUTPUT_PATH)){
+	fs.mkdirSync(OUTPUT_PATH, { recursive: true });
+}
+
+for (const name of ['js']) {
+	const platform = platforms[name]
+	
+	if (!platform) {
+		console.log("Platform not found", name);
+		break;
+	}
+
+	const filePath = `${OUTPUT_PATH}/${platform.name}.${platform.fileExtension}`;
+
 	runTests({platform}).then(({success, lines }) => {
+		const code = platform.format(lines.join('\n'));
+
 		if (success) {
-			console.log(lines.join('\n'));
+			fs.writeFileSync(filePath, code);
+			console.log(`wrote ${platform.name} to ${filePath}`);
 		} else {
 			console.log('Test steps are undefined');
 		}
