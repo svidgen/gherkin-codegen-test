@@ -51,7 +51,7 @@ function codegen(graphql) {
 
 // TODO: `platform` should be a `Target` or `Output` object that can be added to the
 // scope exposed to cucumber tests -- so sneak helper methods in if needed.
-async function runTests({ platform }) {
+async function runTests(platform) {
 	// things we need to specify about the environment
 	const environment = {
 	};
@@ -82,9 +82,14 @@ async function runTests({ platform }) {
 
 const platforms = {
 	js: {
-		name: 'js',
+		extension: 'js',
 		format: code => prettier.format(code, { parser: "babel" }),
-		fileExtension: 'js'
+		prefix: `
+		// before
+		`,
+		postfix: `
+		// after
+		`
 	}
 };
 
@@ -94,17 +99,21 @@ if (!fs.existsSync(OUTPUT_PATH)){
 }
 
 for (const name of ['js']) {
-	const platform = platforms[name]
+	const platform = {...platforms[name], name};
 	
 	if (!platform) {
 		console.log("Platform not found", name);
 		break;
 	}
 
-	const filePath = `${OUTPUT_PATH}/${platform.name}.${platform.fileExtension}`;
+	const filePath = `${OUTPUT_PATH}/${platform.name}.${platform.extension}`;
 
-	runTests({platform}).then(({success, lines }) => {
-		const code = platform.format(lines.join('\n'));
+	runTests(platform).then(({success, lines }) => {
+		const code = platform.format([
+			platform.prefix,
+			...lines,
+			platform.postfix
+		].join('\n'));
 
 		if (success) {
 			fs.writeFileSync(filePath, code);
