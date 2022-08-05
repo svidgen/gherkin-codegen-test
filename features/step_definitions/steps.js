@@ -16,6 +16,10 @@ Before((world) => {
 		case 'js':
 			// emit(`before world js: ${JSON.stringify(world, null, 2)}`);
 			emit(`it("${world.pickle.uri}: ${world.pickle.name}", async () => {`);
+
+			// top level feature description, could be used to printOnce()
+			// emit(`/* ${world.gherkinDocument.feature.description} */`);
+			//
 			break;
 		case 'ios':
 			emit(`before world ios: ${JSON.stringify(world, null, 2)}`);
@@ -96,6 +100,25 @@ When("I save {string} with return value {string}", (obj, varname) => {
 	emit(`const ${normalize(varname)} = await DataStore.save(${obj});`);
 });
 
+When('I query {string} with {string} field {string} into {string}', (table, obj, prop, varname) => {
+	// js version
+	emit(`const ${normalize(varname)} = await DataStore.query(${table}, ${obj}.${prop});`);
+});
+
+When('I query {string} into {string} with a predicate', (table, varname, predicateJson) => {
+	const build = (p) => {
+		const result = [];
+
+		for (const field of Object.keys(p)) {
+			// TODO:
+		}
+
+		// TODO: after predicate refactor, this gets more sane.
+		return result.join('');
+	};
+	emit(`const ${normalized(varname)} = await DataStore.query(${table}, o => ${predicate});`);
+});
+
 Then("{string} should have {string}", (varname, fieldname) => {
 	// js veresion
 	emit(`expect(${normalize(varname)}).toHave(${fieldname});`);
@@ -104,6 +127,11 @@ Then("{string} should have {string}", (varname, fieldname) => {
 Then("{string} field {string} should equal", (varname, fieldname, json) => {
 	// js version
 	emit(`expect(${normalize(varname)}.${fieldname}).toEqual(${json});`);
+});
+
+Then("{string} should be a single item", (varname) => {
+	// js version
+	emit(`expect(Array.isArray(${normalize(varname)})).toBe(false);`);
 });
 
 Then("nothing is on fire", () => {

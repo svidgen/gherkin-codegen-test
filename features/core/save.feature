@@ -30,3 +30,37 @@ Feature: Core Use
 		"""
 		"bob"
 		"""
+
+	Scenario: I can retrieve a simple single-value object by ID
+		When I create a new "Todo" as "todo" with args
+		"""
+		{
+			"name": "Weird Al"
+		}
+		"""
+		And I save "todo" with return value "weird"
+		And I query "Todo" with "weird" field "id" into "results"
+		Then "results" should be a single item
+		And "results" field "name" should equal
+		"""
+		"Weird Al"
+		"""
+
+	Scenario: I can retrieve a simple object by property predicate
+		When I create a new "Todo" as "todo" with args
+		"""
+		{
+			"name": "Bobby Hill"
+		}
+		"""
+		And I save "todo" with return value "bobby"
+		And I query "Todo" into "results" with a predicate
+		"""
+		{
+			"name": {
+				"eq": "Bobby Hill"
+			}
+		}
+		"""
+		Then "results" should be a list of 1
+		And the first item of "results" should match "bobby"

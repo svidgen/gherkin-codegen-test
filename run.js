@@ -84,11 +84,14 @@ const platforms = {
 	js: {
 		extension: 'js',
 		format: code => prettier.format(code, { parser: "babel" }),
-		prefix: `
-		// before
+		prologue: `
+		describe("spec", () => {
+			afterEach(async () => {
+				await DataStore.clear();
+			});
 		`,
-		postfix: `
-		// after
+		epilogue: `
+		});
 		`
 	}
 };
@@ -110,9 +113,9 @@ for (const name of ['js']) {
 
 	runTests(platform).then(({success, lines }) => {
 		const code = platform.format([
-			platform.prefix,
+			platform.prologue,
 			...lines,
-			platform.postfix
+			platform.epilogue
 		].join('\n'));
 
 		if (success) {
