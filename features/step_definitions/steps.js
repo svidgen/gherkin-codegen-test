@@ -20,7 +20,7 @@ function normalize(name) {
 
 function randomString() {
 	const chars = [];
-	for (let i = 0; i < 24; i++) {
+	for (let i = 0; i < 32; i++) {
 		chars.push(
 			'0123456789abcdef'[Math.floor(Math.random() * 16)]
 		);
@@ -30,6 +30,7 @@ function randomString() {
 
 // hoping this runs before each Scenario
 Before((world) => {
+	global.world = world;
 	switch (PLATFORM) {
 		case 'js':
 			// emit(`before world js: ${JSON.stringify(world, null, 2)}`);
@@ -40,7 +41,7 @@ Before((world) => {
 			//
 			break;
 		case 'ios':
-			emit(`before world ios: ${JSON.stringify(world, null, 2)}`);
+			emit(world, `before world ios: ${JSON.stringify(world, null, 2)}`);
 			break;
 		default:
 			throw new Error('Before: Invalid PLATFORM: ' + PLATFORM);

@@ -56,14 +56,16 @@ async function runTests(platform) {
 	const environment = {
 	};
 
-	const lines = [];
+	const streams = {};
 
 	// global.codegen = codegen;
 
 	// not sure how else to ferry things into the cucumber execution context from here.
 	global.PLATFORM = platform.name;
 	global.emit = function(line) {
-		lines.push(line);
+		const stream = global.world.pickle.uri.replace(/\//g, '-');
+		streams[stream] = streams[stream] || [];
+		streams[stream].push(line);
 	};
 
 	// load configuration from a particular file, and override a specific option
@@ -77,7 +79,7 @@ async function runTests(platform) {
 	const { success } = await runCucumber({ ...runConfiguration }, environment, callback_value => {
 		// console.log('cb value', JSON.stringify(callback_value, null, 2));
 	});
-	return { success, lines };
+	return { success, streams };
 }
 
 const platforms = {
@@ -97,9 +99,6 @@ const platforms = {
 };
 
 rimraf.sync(OUTPUT_PATH);
-if (!fs.existsSync(OUTPUT_PATH)){
-	fs.mkdirSync(OUTPUT_PATH, { recursive: true });
-}
 
 for (const name of ['js']) {
 	const platform = {...platforms[name], name};
@@ -109,20 +108,25 @@ for (const name of ['js']) {
 		break;
 	}
 
-	const filePath = `${OUTPUT_PATH}/${platform.name}.${platform.extension}`;
+	if (!fs.existsSync(OUTPUT_PATH)){
+		fs.mkdirSync(`${OUTPUT_PATH}/${platform.name}`, { recursive: true });
+	}
 
-	runTests(platform).then(({success, lines }) => {
-		const code = platform.format([
-			platform.prologue,
-			...lines,
-			platform.epilogue
-		].join('\n'));
+	runTests(platform).then(({success, streams }) => {
+		for (const [stream, lines] of Object.entries(streams)) {
+			const filePath = `${OUTPUT_PATH}/${platform.name}/${stream}.${platform.extension}`;
+			const code = platform.format([
+				platform.prologue,
+				...lines,
+				platform.epilogue
+			].join('\n'));
 
-		if (success) {
-			fs.writeFileSync(filePath, code);
-			console.log(`wrote ${platform.name} to ${filePath}`);
-		} else {
-			console.log('Test steps are undefined');
+			if (success) {
+				fs.writeFileSync(filePath, code);
+				console.log(`wrote ${platform.name} to ${filePath}`);
+			} else {
+				console.log('Test steps are undefined');
+			}
 		}
 	});
 }
