@@ -8,46 +8,6 @@ const rimraf = require('rimraf');
 
 const OUTPUT_PATH = 'dist';
 
-// const { parse } = require('graphql');
-
-// const codegen = require('amplify-codegen');
-// const generateModels = require('amplify-codegen/commands/models');
-// const mockFs = require('mock-fs');
-// const graphqlCodegen = require('@graphql-codegen/core');
-
-
-/*
- * ref
- *
-export declare class PostCustomPKSort {
-	public readonly id: string;
-	public readonly postId: number;
-	public readonly title: string;
-	public readonly description?: string;
-}
-*/
-
-/*
-function codegen(graphql) {
-	// return JSON.stringify(parse(graphql), null, 2);
-	const definitions = parse(graphql).definitions;
-	return JSON.stringify(definitions.map(d => {
-		const name = d.name.value;
-		const isModel = d.directives.findIndex(dir => dir.name === 'model') > -1;
-		const fields = d.fields.map(field => ({
-			name: field.name.value,
-			// type: field.type.name.value,
-		}));
-		return {
-			name, isModel, fields
-		};
-	}), null, 2);
-}
-*/
-
-
-// console.log('codegen keys', Object.keys(codegen));
-
 
 // TODO: `platform` should be a `Target` or `Output` object that can be added to the
 // scope exposed to cucumber tests -- so sneak helper methods in if needed.
