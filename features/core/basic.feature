@@ -64,3 +64,23 @@ Feature: Core Use
 		"""
 		Then "results" should be a list of 1
 		And the first item of "results" should match "bobby"
+
+	Scenario Outline: I can save a <model> record with name <name>
+		When I create a new "<model>" as "original" with args
+		"""
+		<args>
+		"""
+		And I save "original" with return value "saved"
+		And I query "<model>" into "results" with a predicate
+		"""
+		<predicate>
+		"""
+		Then "results" should be a list of 1
+		And the first item of "results" should match "original"
+
+		Examples:
+			| model | args | predicate |
+			| Todo | { "name": "George" } | { "name": { "eq": "George" } } |
+			| Todo | { "name": "Jeff" } | { "name": { "eq": "Jeff" } } |
+
+

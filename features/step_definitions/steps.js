@@ -4,10 +4,28 @@ const { defineParameterType, After, Before, Given, When, Then } = require('@cucu
  * to import from PLATFORM scope
  */
 
+defineParameterType({
+	name: 'fields',
+	regexp: /\[(([\w\d_]+)(\s*,\s*[\w\d_]+)*)\]/,
+	transformer: s => {
+		return s.split(',').map(n => n.trim());
+	}
+});
+
 
 // TODO: change to varname or something
 function normalize(name) {
 	return name.split(/\s+/g).join('_');
+}
+
+function randomString() {
+	const chars = [];
+	for (let i = 0; i < 24; i++) {
+		chars.push(
+			'0123456789abcdef'[Math.floor(Math.random() * 16)]
+		);
+	}
+	return chars.join('');
 }
 
 // hoping this runs before each Scenario
@@ -47,7 +65,7 @@ After((world) => {
 Given("a configured Amplify context", () => {
 	switch (PLATFORM) {
 		case 'js':
-			emit('Amplify.configure({});');
+			emit('await Amplify.configure({});');
 			break;
 		case 'ios':
 			emit('context ios');
@@ -60,7 +78,7 @@ Given("a configured Amplify context", () => {
 Given("a clean client database", () => {
 	switch (PLATFORM) {
 		case 'js':
-			emit(`DataStore.clear();`);
+			emit(`await DataStore.clear();`);
 			break;
 		case 'ios':
 			emit(`clean db world ios`);
@@ -95,6 +113,16 @@ When("I create a new {string} as {string} with args", (model, varname, json) => 
 	emit(`const ${normalize(varname)} = new ${model}(${json});`);
 });
 
+When("I create a new {string} as {string} with randomized {fields}",
+(model, varname, fields) => {
+	// js version
+	const initialization = {};
+	for (const k of fields) {
+		initialization[k] = randomString();
+	}
+	emit(`const ${normalize(varname)} = new ${model}(${JSON.stringify(initialization)});`);
+});
+
 When("I save {string} with return value {string}", (obj, varname) => {
 	// js version
 	emit(`const ${normalize(varname)} = await DataStore.save(${obj});`);
@@ -106,22 +134,44 @@ When('I query {string} with {string} field {string} into {string}', (table, obj,
 });
 
 When('I query {string} into {string} with a predicate', (table, varname, predicateJson) => {
+
+	// TODO: supports only flat conditions currently. no and/or/not groups yet.
+
+	const condition = (c) => {
+		// there should be a single condition.
+		const operators = Object.keys(c);
+
+		if (operators.length != 1) {
+			throw new Error(`Only a single operator is supported, but found ${operators}`);
+		}
+
+		const op = operators.pop();
+		return `("${op}", "${c[op]}")`;
+	};
+
 	const build = (p) => {
-		const result = [];
+		const result = [
+			'o => o'
+		];
 
 		for (const field of Object.keys(p)) {
-			// TODO:
+			result.push(
+				`.${field}${condition(p[field])}`
+			);
 		}
 
 		// TODO: after predicate refactor, this gets more sane.
 		return result.join('');
 	};
-	emit(`const ${normalized(varname)} = await DataStore.query(${table}, o => ${predicate});`);
+
+	const predicate = build(JSON.parse(predicateJson));
+
+	emit(`const ${normalize(varname)} = await DataStore.query(${table}, ${predicate});`);
 });
 
 Then("{string} should have {string}", (varname, fieldname) => {
 	// js veresion
-	emit(`expect(${normalize(varname)}).toHave(${fieldname});`);
+	emit(`expect(${normalize(varname)}).toHave("${fieldname}");`);
 });
 
 Then("{string} field {string} should equal", (varname, fieldname, json) => {
@@ -132,6 +182,29 @@ Then("{string} field {string} should equal", (varname, fieldname, json) => {
 Then("{string} should be a single item", (varname) => {
 	// js version
 	emit(`expect(Array.isArray(${normalize(varname)})).toBe(false);`);
+});
+
+Then('{string} should be a list of {int}', (varname, length) => {
+	// js version
+	emit(`expect(${normalize(varname)}.length).toBe(${length});`);
+});
+
+Then('the first item of {string} should match {string}', (varname, expectedVarname) => {
+	// js version
+	emit(`expect(${normalize(varname)}).toMatch(${normalize(expectedVarname)});`);
+});
+
+Then('{string} {fields} should match {string} {fields}', (
+	varname_actual,
+	fields_actual,
+	varname_expected,
+	fields_expected
+) => {
+	for (let i = 0; i < fields_actual.length; i++) {
+		const actual = `${normalize(varname_actual)}.${fields_actual[i]}`;
+		const expected = `${normalize(varname_expected)}.${fields_expected[i]}`;
+		emit(`expect(${actual}).toEqual(${expected});`);
+	}
 });
 
 Then("nothing is on fire", () => {
