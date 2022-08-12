@@ -6,9 +6,9 @@ Feature: Custom primary key support
 		And a clean client database
 
 	Scenario: I can save a model with a custom PK (<model>)
-		When I create a new "<model>" as "original" with randomized <fields>
-		And I save "original" with return value "saved item"
-		Then "saved item" <fields> should match "original" <fields>
+		When I create a new `<model>` as `original` with randomized <fields>
+		And I save `original` and return `savedItem`
+		Then `savedItem` <fields> should match `original` <fields>
 
 		Examples:
 			| model | fields     | pk   |
