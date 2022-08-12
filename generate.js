@@ -6,7 +6,8 @@ const path = require('path');
 const rimraf = require('rimraf');
 const process = require('process');
 
-const { js_jest, js_qunit } = require('./platforms');
+// const { js_jest, js_qunit } = require('./platforms');
+const platforms = require('./platforms');
 
 const TARGET = process.argv[2];
 
@@ -48,24 +49,6 @@ async function runTests(platform) {
 	const { success } = await runCucumber({ ...runConfiguration }, environment);
 	return { success, streams };
 }
-
-/**
- * The output platform definitions.
- *
- * Each platform entry listed here must specify a
- * 	format function,
- * 	prologue,
- * 	epilogue,
- * 	and all commands requested by the test runner.
- *
- * Refer to the `jstest` platform as an example.
- *
- * The key will be used as the platform's final `name` when writing artifacts.
- */
-const platforms = {
-	'js-jest': js_jest,
-	'js-qunit': js_qunit
-}; // platforms
 
 (async () => {
 	// cucumber doesn't like it when we invoke it twice ... not sure why!
