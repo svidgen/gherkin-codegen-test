@@ -1,9 +1,12 @@
 const prettier = require("prettier");
+const { helpers } = require('../lib/js');
 
 module.exports = {
 	extension: 'js',
 	format: code => prettier.format(code, { parser: "babel" }),
 	prologue: `
+		${helpers}
+
 		describe("spec", () => {
 			afterEach(async () => {
 				await DataStore.clear();

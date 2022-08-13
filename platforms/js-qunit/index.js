@@ -1,9 +1,25 @@
-const prettier = require("prettier");
-const js_jest = require('./js-jest');
+const js_jest = require('../js-jest');
+const { helpers } = require('../lib/js');
 
 module.exports = {
 	...js_jest,
 	prologue: `
+		import { useEffect } from 'react';
+		import QUnit from 'qunit';
+		import 'qunit/qunit/qunit.css';
+
+		import { Amplify, API, DataStore } from 'aws-amplify';
+		import { BasicModel, Post, Comment } from './models';
+		import * as mutations from './graphql/mutations';
+
+		import awsconfig from './aws-exports';
+
+		Amplify.configure(awsconfig);
+
+		${helpers}
+
+		const makeID = () => crypto.randomUUID();
+
 		QUnit.start();
 		QUnit.module("spec", () => {
 			QUnit.testDone(async () => {
@@ -12,6 +28,17 @@ module.exports = {
 		`,
 	epilogue: `
 		});
+
+		function App() {
+		  return (
+			<div className="App">
+				<div id="qunit"></div>
+				<div id="qunit-fixture"></div>
+			</div>
+		  );
+		}
+
+		export default App;
 		`,
 	commands: {
 		...js_jest.commands,
