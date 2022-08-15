@@ -62,13 +62,22 @@ async function runTests(platform) {
 			return;
 		}
 
-		if (!fs.existsSync(`${OUTPUT_PATH}/${platform.name}`)){
-			fs.mkdirSync(`${OUTPUT_PATH}/${platform.name}`, { recursive: true });
+		const finalOutputDirectory = [
+			OUTPUT_PATH,
+			platform.name,
+			platform.outputDirectory
+		].filter(p => p).join('/');
+
+		if (!fs.existsSync(finalOutputDirectory)) {
+			fs.mkdirSync(finalOutputDirectory, { recursive: true });
 		}
 
 		const { success, streams } = await runTests(platform);
 		for (const [stream, lines] of Object.entries(streams)) {
-			const filePath = `${OUTPUT_PATH}/${platform.name}/${stream}.${platform.extension}`;
+			const filePath = [
+				finalOutputDirectory,
+				`${stream}.${platform.extension}`
+			].join('/');
 			const code = platform.format([
 				platform.prologue,
 				...lines,

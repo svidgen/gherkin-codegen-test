@@ -4,6 +4,7 @@ const { helpers } = require('../lib/js');
 module.exports = {
 	extension: 'js',
 	format: code => prettier.format(code, { parser: "babel" }),
+	outputDirectory: '',
 	prologue: `
 		${helpers}
 
