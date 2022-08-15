@@ -1,4 +1,5 @@
 const js_jest = require('./js-jest');
+const js_rn_self_test = require('./js-rn-self-test');
 const js_qunit = require('./js-qunit');
 
 /**
@@ -16,5 +17,6 @@ const js_qunit = require('./js-qunit');
  */
 module.exports = {
 	'js-jest': js_jest,
+	'js-rn-self-test': js_rn_self_test,
 	'js-qunit': js_qunit
 };

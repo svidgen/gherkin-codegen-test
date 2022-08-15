@@ -2,7 +2,8 @@ const { execSync } = require('child_process');
 
 for (const target of [
 	'js-jest',
-	'js-qunit'
+	'js-qunit',
+	'js-rn-self-test'
 ]) {
 	console.log(`generating ${target} ...`);
 	execSync(`node generate.js ${target}`, {
