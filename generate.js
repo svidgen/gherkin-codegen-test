@@ -157,4 +157,16 @@ var copyRecursiveSync = function(src, dest) {
 			console.log('Test steps are undefined');
 		}
 	}
+
+	for (const [name, generate] of Object.entries(platform.manifests || {})) {
+		const filePath = [
+			platformOutputDirectory,
+			name
+		].join('/');
+
+		const code = generate({streams});
+
+		fs.writeFileSync(filePath, code);
+		console.log(`Wrote ${platform.name} manifest ${filePath} ...`);
+	}
 })();

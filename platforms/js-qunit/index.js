@@ -16,47 +16,57 @@ module.exports = {
 			awscloudformation: {
 				configLevel: 'project',
 				useProfile: true,
-				profileName: 'wirej'
+				profileName: 'wirej' // need to pull this from ENV and/or use ENV secrets
 			}
 		}
 	},
+	manifests: {
+		'src/App.js': ({streams}) => `
+			import { useEffect } from 'react';
+			import QUnit from 'qunit';
+			import 'qunit/qunit/qunit.css';
+
+			import awsconfig from './aws-exports';
+			Amplify.configure(awsconfig);
+
+			QUnit.start();
+
+			QUnit.module("spec", () => {
+				QUnit.testDone(async () => {
+					await DataStore.clear();
+				});
+				${Object.keys(streams).map(name => `(() => {
+					const addTests = require('./${name}');
+					addTests(Qunit);
+				})();`).join('\n')}
+			});
+
+			function App() {
+			  return (
+				<div className="App">
+					<div id="qunit"></div>
+					<div id="qunit-fixture"></div>
+				</div>
+			  );
+			}
+
+			export default App;
+		`
+	},
 	prologue: `
-		import { useEffect } from 'react';
-		import QUnit from 'qunit';
-		import 'qunit/qunit/qunit.css';
-
-		import { Amplify, API, DataStore } from 'aws-amplify';
-		import { BasicModel, Post, Comment } from './models';
-		import * as mutations from './graphql/mutations';
-
-		import awsconfig from './aws-exports';
-
-		Amplify.configure(awsconfig);
+		const { Amplify, API, DataStore } = require('aws-amplify');
+		const { BasicModel, Post, Comment } = require('./models');
+		const mutations = require('./graphql/mutations');
 
 		${helpers}
 
 		const makeID = () => crypto.randomUUID();
 
-		QUnit.start();
-		QUnit.module("spec", () => {
-			QUnit.testDone(async () => {
-				await DataStore.clear();
-			});
+		module.exports = (QUnit) => {
 		`,
 	epilogue: `
-		});
-
-		function App() {
-		  return (
-			<div className="App">
-				<div id="qunit"></div>
-				<div id="qunit-fixture"></div>
-			</div>
-		  );
-		}
-
-		export default App;
-		`,
+		};
+	`,
 	commands: {
 		...js_jest.commands,
 		beforeEach: ({name}) => `QUnit.test("${name}", async assert => {`,
