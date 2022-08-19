@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "build": "rimraf dist && node main.js",
+    "build": "node main.js",
+    "rebuild": "rimraf dist && node main.js",
     "test": "cucumber-js"
   },
   "author": "",

@@ -3,6 +3,23 @@ const { helpers } = require('../lib/js');
 
 module.exports = {
 	...js_jest,
+	init: [
+		'npx create-react-app .',
+		'npm i aws-amplify qunit'
+	],
+	specDirectory: 'src',
+	amplify: {
+		frontend: {
+			frontend: 'javascript',
+		},
+		providers: {
+			awscloudformation: {
+				configLevel: 'project',
+				useProfile: true,
+				profileName: 'wirej'
+			}
+		}
+	},
 	prologue: `
 		import { useEffect } from 'react';
 		import QUnit from 'qunit';

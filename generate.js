@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');
 const process = require('process');
+const { execSync } = require('child_process');
 
 // const { js_jest, js_qunit } = require('./platforms');
 const platforms = require('./platforms');
@@ -50,46 +51,110 @@ async function runTests(platform) {
 	return { success, streams };
 }
 
+/**
+ * Simulate `cp -r`.
+ *
+ * https://stackoverflow.com/a/22185855/779572
+ *
+ * @param {string} src  The path to the thing to copy.
+ * @param {string} dest The path to the new copy.
+ */
+var copyRecursiveSync = function(src, dest) {
+	var exists = fs.existsSync(src);
+	var stats = exists && fs.statSync(src);
+	var isDirectory = exists && stats.isDirectory();
+	if (isDirectory) {
+		fs.mkdirSync(dest);
+		fs.readdirSync(src).forEach(function(childItemName) {
+			copyRecursiveSync(path.join(src, childItemName),
+				path.join(dest, childItemName));
+		});
+	} else {
+		fs.copyFileSync(src, dest);
+	}
+};
+
 (async () => {
 	// cucumber doesn't like it when we invoke it twice ... not sure why!
 	// but, for now that means we need to perform our looping outside the proc.
-	// for (const name of ['js-jest', 'js-qunit']) {
-		// const platform = {...platforms[name], name};
-		const platform = {...platforms[TARGET], name: TARGET};
+	const platform = {...platforms[TARGET], name: TARGET};
 
-		if (!platform) {
-			console.log("Platform not found", TARGET);
-			return;
-		}
+	if (!platform) {
+		console.log("Platform not found", TARGET);
+		return;
+	}
 
-		const finalOutputDirectory = [
-			OUTPUT_PATH,
-			platform.name,
-			platform.outputDirectory
-		].filter(p => p).join('/');
+	const platformOutputDirectory = [
+		OUTPUT_PATH,
+		platform.name
+	].join('/');
 
-		if (!fs.existsSync(finalOutputDirectory)) {
-			fs.mkdirSync(finalOutputDirectory, { recursive: true });
-		}
+	const specOutputDirectory = [
+		platformOutputDirectory,
+		platform.specDirectory
+	].filter(p => p).join('/');
 
-		const { success, streams } = await runTests(platform);
-		for (const [stream, lines] of Object.entries(streams)) {
-			const filePath = [
-				finalOutputDirectory,
-				`${stream}.${platform.extension}`
-			].join('/');
-			const code = platform.format([
-				platform.prologue,
-				...lines,
-				platform.epilogue
-			].join('\n'));
+	if (!fs.existsSync(platformOutputDirectory)) {
+		fs.mkdirSync(platformOutputDirectory, { recursive: true });
 
-			if (success) {
-				fs.writeFileSync(filePath, code);
-				console.log(`Wrote ${platform.name} artifact ${filePath} ...`);
-			} else {
-				console.log('Test steps are undefined');
+		const POP_CD = process.cwd();
+		process.chdir(platformOutputDirectory);
+
+		if (platform.init) {
+			for (const command of platform.init) {
+				console.log(`Running \`${command}\` ...`);
+				execSync(command, { stdio: [ 'ignore', 'inherit', 'inherit' ] });
 			}
 		}
-	// }
+
+		if (platform.amplify) {
+			// double-stringify for encoding JSON "as a string" for use as CLI args
+			const amplify = JSON.stringify(JSON.stringify(platform.amplify.amplify || {}));
+			const frontend = JSON.stringify(JSON.stringify(platform.amplify.frontend || {}));
+			const providers = JSON.stringify(JSON.stringify(platform.amplify.providers || {}));
+
+			const initCommand = [
+				'amplify init --yes',
+				'--amplify', amplify,
+				'--frontend', frontend,
+				'--providers', providers
+			].join(' ');
+
+			console.log(`Running \`${initCommand}\` ...`);
+
+			execSync(initCommand, {
+				stdio: [
+					'ignore',
+					'inherit',
+					'inherit'
+				]
+			});
+		}
+
+		process.chdir(POP_CD);
+	}
+
+	if (!fs.existsSync(specOutputDirectory)) {
+		fs.mkdirSync(specOutputDirectory, { recursive: true });
+	}
+
+	const { success, streams } = await runTests(platform);
+	for (const [stream, lines] of Object.entries(streams)) {
+		const filePath = [
+			specOutputDirectory,
+			`${stream}.${platform.extension}`
+		].join('/');
+		const code = platform.format([
+			platform.prologue,
+			...lines,
+			platform.epilogue
+		].join('\n'));
+
+		if (success) {
+			fs.writeFileSync(filePath, code);
+			console.log(`Wrote ${platform.name} artifact ${filePath} ...`);
+		} else {
+			console.log('Test steps are undefined');
+		}
+	}
 })();
