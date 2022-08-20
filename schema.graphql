@@ -1,0 +1,22 @@
+type Customer @model {
+	id: ID! @primaryKey
+	name: String!
+}
+
+type Order @model {
+	orderId: ID! @primaryKey
+	lineItems: [LineItem] @hasMany	
+}
+
+type LineItem @model {
+	id: ID! @primaryKey
+	quantity: Int!
+	product: Product! @hasOne
+	order: Order! @belongsTo
+}
+
+type Product @model {
+	id: ID! @primaryKey
+	sku: String!
+	description: String
+}

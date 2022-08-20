@@ -11,8 +11,8 @@ Feature: Custom primary key support
 		Then `savedItem` <fields> should match `original` <fields>
 
 		Examples:
-			| model | fields     | pk   |
-			| Todo  | [id, name] | [id] |
-			| Comment | [commentId, owner, message] | [commentId, owner] |
-			| Post | [postId, name, content] | [postId, name] |
+			| model   | fields                  | pk                 |
+			| Todo    | [id, name]              | [id]               |
+			| Comment | [commentId, message]    | [commentId, owner] |
+			| Post    | [postId, name, content] | [postId, name]     |
 
