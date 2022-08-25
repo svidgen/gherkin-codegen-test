@@ -1,3 +1,4 @@
+const prettier = require("prettier");
 const js_jest = require('../js-jest');
 const { helpers } = require('../lib/js');
 
@@ -21,11 +22,12 @@ module.exports = {
 		}
 	},
 	manifests: {
-		'src/App.js': ({streams}) => `
+		'src/App.js': ({streams}) => prettier.format(`
 			import { useEffect } from 'react';
 			import QUnit from 'qunit';
 			import 'qunit/qunit/qunit.css';
 
+			import { Amplify, DataStore } from 'aws-amplify';
 			import awsconfig from './aws-exports';
 			Amplify.configure(awsconfig);
 
@@ -37,7 +39,7 @@ module.exports = {
 				});
 				${Object.keys(streams).map(name => `(() => {
 					const addTests = require('./${name}');
-					addTests(Qunit);
+					addTests(QUnit);
 				})();`).join('\n')}
 			});
 
@@ -51,7 +53,7 @@ module.exports = {
 			}
 
 			export default App;
-		`
+		`, { parser: 'babel'})
 	},
 	prologue: `
 		const { Amplify, API, DataStore } = require('aws-amplify');
@@ -71,6 +73,8 @@ module.exports = {
 		...js_jest.commands,
 		beforeEach: ({name}) => `QUnit.test("${name}", async assert => {`,
 		afterEach: ({name}) => '});',
+		configureAmplify: () => `// Amplify configuration occurs in App.js`,
+		datastoreClear: () => `// clearing in tests is temporarily skipped, pending clear/stop fix`,
 		expectRefToEqualValue: ({reference, value}) => (
 			`assert.equal(${reference}, ${JSON.stringify(value)});`
 		),

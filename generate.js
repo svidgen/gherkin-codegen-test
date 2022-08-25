@@ -3,7 +3,6 @@
 const { loadConfiguration, loadSupport, runCucumber } = require('@cucumber/cucumber/api');
 const fs = require('fs');
 const path = require('path');
-const rimraf = require('rimraf');
 const process = require('process');
 const { execSync } = require('child_process');
 
@@ -59,7 +58,7 @@ async function runTests(platform) {
  * @param {string} src  The path to the thing to copy.
  * @param {string} dest The path to the new copy.
  */
-var copyRecursiveSync = function(src, dest) {
+const copyRecursiveSync = function(src, dest) {
 	var exists = fs.existsSync(src);
 	var stats = exists && fs.statSync(src);
 	var isDirectory = exists && stats.isDirectory();
@@ -73,6 +72,22 @@ var copyRecursiveSync = function(src, dest) {
 		fs.copyFileSync(src, dest);
 	}
 };
+
+function exec(command, input) {
+	console.log(`Running \`${command}\` ...`);
+	if (input) {
+		execSync(command, { input });
+	} else {
+		execSync(command, {
+			stdio: [
+				'ignore',
+				'inherit',
+				'inherit'
+			]
+		});
+	}
+}
+
 
 (async () => {
 	// cucumber doesn't like it when we invoke it twice ... not sure why!
@@ -95,6 +110,7 @@ var copyRecursiveSync = function(src, dest) {
 	].filter(p => p).join('/');
 
 	if (!fs.existsSync(platformOutputDirectory)) {
+		const schemaGraphql = fs.readFileSync('schema.graphql').toString();
 		fs.mkdirSync(platformOutputDirectory, { recursive: true });
 
 		const POP_CD = process.cwd();
@@ -129,6 +145,35 @@ var copyRecursiveSync = function(src, dest) {
 					'inherit'
 				]
 			});
+
+			const apiConfig = {
+				version: 1,
+				serviceConfiguration: {
+					serviceName: "AppSync",
+					apiName: "myNewHeadlessApi",
+					transformSchema: schemaGraphql,
+					defaultAuthType: {
+						mode: "API_KEY"
+					}
+				}
+			};
+
+			const apiConfigJSON = JSON.stringify(apiConfig);
+			const addApiCommand = 'amplify add api --headless';
+			console.log(`Running \`${apiConfigJSON} | ${addApiCommand}\` ...`);
+			execSync(addApiCommand, { input: apiConfigJSON });
+
+			const amplifyPushCommand = `amplify push --yes`;
+			console.log(`Running \`${amplifyPushCommand}\` ...`);
+			execSync(amplifyPushCommand, {
+				stdio: [
+					'ignore',
+					'inherit',
+					'inherit'
+				]
+			});
+
+			exec(`amplify codegen models --yes`);
 		}
 
 		process.chdir(POP_CD);
