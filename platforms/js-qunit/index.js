@@ -6,7 +6,7 @@ module.exports = {
 	...js_jest,
 	init: [
 		'npx create-react-app .',
-		'npm i aws-amplify qunit'
+		'npm i aws-amplify@custom-pk qunit'
 	],
 	specDirectory: 'src',
 	amplify: {
@@ -29,13 +29,14 @@ module.exports = {
 
 			import { Amplify, DataStore } from 'aws-amplify';
 			import awsconfig from './aws-exports';
+
 			Amplify.configure(awsconfig);
 
 			QUnit.start();
-
 			QUnit.module("spec", () => {
 				QUnit.testDone(async () => {
-					await DataStore.clear();
+					// just causes trouble until fix is merged.
+					// await DataStore.clear();
 				});
 				${Object.keys(streams).map(name => `(() => {
 					const addTests = require('./${name}');
@@ -57,7 +58,7 @@ module.exports = {
 	},
 	prologue: `
 		const { Amplify, API, DataStore } = require('aws-amplify');
-		const { BasicModel, Post, Comment } = require('./models');
+		const { Customer, Order, LineItem, Product } = require('./models');
 		const mutations = require('./graphql/mutations');
 
 		${helpers}

@@ -8,17 +8,10 @@ Feature: Core Use
 	Background:
 		Given a configured Amplify context
 		And a clean client database
-		And a new client schema
-		"""
-		type Todo @model {
-			id: ID!
-			name: String
-		}
-		"""
-		And I import "Todo" from models
+		And I import "Customer" from models
 
 	Scenario: I can save a simple single-value object
-		When I create a new `Todo` as `todo` with args
+		When I create a new `Customer` as `todo` with args
 		"""
 		{
 			"name": "bob"
@@ -31,14 +24,14 @@ Feature: Core Use
 		"""
 
 	Scenario: I can retrieve a simple single-value object by ID
-		When I create a new `Todo` as `todo` with args
+		When I create a new `Customer` as `todo` with args
 		"""
 		{
 			"name": "Weird Al"
 		}
 		"""
 		And I save `todo` and return `weird`
-		And I query `Todo` with `weird.id` into `results`
+		And I query `Customer` with `weird.id` into `results`
 		Then `results` should be a single item
 		And `results.name` should equal
 		"""
@@ -46,14 +39,14 @@ Feature: Core Use
 		"""
 
 	Scenario: I can retrieve a simple object by property predicate
-		When I create a new `Todo` as `todo` with args
+		When I create a new `Customer` as `todo` with args
 		"""
 		{
 			"name": "Bobby Hill"
 		}
 		"""
 		And I save `todo` and return `bobby`
-		And I query `Todo` into `results` with a predicate
+		And I query `Customer` into `results` with a predicate
 		"""
 		{
 			"name": {
@@ -79,7 +72,7 @@ Feature: Core Use
 
 		Examples:
 			| model | args | predicate |
-			| Todo | { "name": "George" } | { "name": { "eq": "George" } } |
-			| Todo | { "name": "Jeff" } | { "name": { "eq": "Jeff" } } |
+			| Customer | { "name": "George" } | { "name": { "eq": "George" } } |
+			| Customer | { "name": "Jeff" }   | { "name": { "eq": "Jeff" } }   |
 
 
