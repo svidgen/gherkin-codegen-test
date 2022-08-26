@@ -27,16 +27,20 @@ module.exports = {
 			import QUnit from 'qunit';
 			import 'qunit/qunit/qunit.css';
 
-			import { Amplify, DataStore } from 'aws-amplify';
+			import { Amplify, DataStore, Predicates } from 'aws-amplify';
 			import awsconfig from './aws-exports';
+			const { Customer, Order, LineItem, Product } = require('./models');
 
 			Amplify.configure(awsconfig);
 
 			QUnit.start();
-			QUnit.module("spec", () => {
-				QUnit.testDone(async () => {
+			QUnit.module("spec", async () => {
+				QUnit.testStart(async () => {
 					// just causes trouble until fix is merged.
 					// await DataStore.clear();
+					for (const M of [Customer, Order, LineItem, Product]) {
+						await DataStore.delete(M, Predicates.ALL);
+					}
 				});
 				${Object.keys(streams).map(name => `(() => {
 					const addTests = require('./${name}');
@@ -83,10 +87,13 @@ module.exports = {
 			`assert.ok(!Array.isArray(${reference}));`
 		),
 		expectRefLengthToBe: ({reference, length}) => (
-			`assert.equal(${reference}.length, ${length});`
+			`assert.equal(${reference}.length, ${length}, "the result is a list of 1");`
 		),
 		expectFirstItemToMatchRef: ({reference, expectedValueRef}) => (
-			`assert.equal(${reference}, ${expectedValueRef});`
+			`
+			console.log(JSON.stringify(${reference}[0]));
+			assert.deepEqual(${reference}[0], ${expectedValueRef}, "the first item matches");
+			`
 		),
 		expectFieldsToMatch: ({ actualRef, actualFields, expectedRef, expectedFields }) => {
 			const lines = [];

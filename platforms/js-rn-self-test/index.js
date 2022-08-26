@@ -40,7 +40,7 @@ module.exports = {
 			`expect(${reference}.length).toBe(${length});`
 		),
 		expectFirstItemToMatchRef: ({reference, expectedValueRef}) => (
-			`expect(${reference}).toMatch(${expectedValueRef});`
+			`expect(${reference}[0]).toMatch(${expectedValueRef});`
 		),
 		expectFieldsToMatch: ({ actualRef, actualFields, expectedRef, expectedFields }) => {
 			const lines = [];
