@@ -74,10 +74,11 @@ const copyRecursiveSync = function(src, dest) {
 };
 
 function exec(command, input) {
-	console.log(`Running \`${command}\` ...`);
 	if (input) {
-		execSync(command, { input });
+		console.log(`Running \`${input} | ${command}\` ...`);
+		execSync(command, { input: input });
 	} else {
+		console.log(`Running \`${command}\` ...`);
 		execSync(command, {
 			stdio: [
 				'ignore',
@@ -136,15 +137,7 @@ function exec(command, input) {
 				'--providers', providers
 			].join(' ');
 
-			console.log(`Running \`${initCommand}\` ...`);
-
-			execSync(initCommand, {
-				stdio: [
-					'ignore',
-					'inherit',
-					'inherit'
-				]
-			});
+			exec(initCommand);
 
 			const apiConfig = {
 				version: 1,
@@ -154,25 +147,18 @@ function exec(command, input) {
 					transformSchema: schemaGraphql,
 					defaultAuthType: {
 						mode: "API_KEY"
+					},
+					conflictResolution: {
+						defaultResolutionStrategy: {
+							type: 'AUTOMERGE'
+						}
 					}
 				}
 			};
 
 			const apiConfigJSON = JSON.stringify(apiConfig);
-			const addApiCommand = 'amplify add api --headless';
-			console.log(`Running \`${apiConfigJSON} | ${addApiCommand}\` ...`);
-			execSync(addApiCommand, { input: apiConfigJSON });
-
-			const amplifyPushCommand = `amplify push --yes`;
-			console.log(`Running \`${amplifyPushCommand}\` ...`);
-			execSync(amplifyPushCommand, {
-				stdio: [
-					'ignore',
-					'inherit',
-					'inherit'
-				]
-			});
-
+			exec(`amplify add api --headless`, apiConfigJSON);
+			exec(`amplify push --yes`);
 			exec(`amplify codegen models --yes`);
 		}
 

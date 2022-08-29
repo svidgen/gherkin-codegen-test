@@ -27,7 +27,7 @@ for (const target of [
 			});
 		} catch (error) {
 			console.error([
-				`We tried to delete an Amplify backend for ${target}, but couldn't.`
+				`We tried to delete an Amplify backend for ${target}, but couldn't.`,
 				`If a backend for ${target} exists, you need to delete it manually.`
 			].join('\n'));
 		}
