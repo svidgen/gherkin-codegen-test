@@ -136,8 +136,18 @@ function exec(command, input) {
 				'--frontend', frontend,
 				'--providers', providers
 			].join(' ');
-
 			exec(initCommand);
+
+			const cliConfigTransformerUpdates = {
+				respectprimarykeyattributesonconnectionfield: true
+			};
+			const cliConfig = JSON.parse(fs.readFileSync('amplify/cli.json').toString());
+			cliConfig.features.graphqltransformer = {
+				...cliConfig.features.graphqltransformer,
+				...cliConfigTransformerUpdates
+			};
+			fs.writeFileSync('amplify/cli.json', JSON.stringify(cliConfig, null, 2));
+			console.log('updated cli.json ...');
 
 			const apiConfig = {
 				version: 1,

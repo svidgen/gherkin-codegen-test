@@ -86,6 +86,21 @@ When("I create a new {ref} as {name} with randomized {fields}", (
 	}));
 });
 
+When("I create a new {ref} as {name} with randomized {fields} and {name} set to {ref}", (
+	model, varname, fields, prop, setTo
+) => {
+	const value = {};
+	for (const k of fields) {
+		value[k] = JSON.stringify(randomString());
+	}
+	value[prop] = setTo;
+	emit(platform.commands.instantiateModelWithRef({
+		varname: normalize(varname),
+		model,
+		ref: platform.commands.objectLiteral(value)
+	}));
+});
+
 When("I save {name} and return {name}", (valueName, returnName) => {
 	emit(platform.commands.datastoreSaveFromVariable({
 		returnName: returnName,
@@ -143,6 +158,20 @@ Then('{ref} {fields} should match {ref} {fields}', (
 	expectedFields
 ) => {
 	emit(platform.commands.expectFieldsToMatch({
+		actualRef,
+		actualFields,
+		expectedRef,
+		expectedFields
+	}));
+});
+
+Then('awaited {ref} {fields} should match {ref} {fields}', (
+	actualRef,
+	actualFields,
+	expectedRef,
+	expectedFields
+) => {
+	emit(platform.commands.expectAwaitedRefFieldsToMatch({
 		actualRef,
 		actualFields,
 		expectedRef,

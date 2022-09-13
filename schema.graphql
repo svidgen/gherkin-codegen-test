@@ -1,3 +1,10 @@
+#
+# Demonstrative models.
+#
+# For tests that demonstrate how a customer ought to use API/DataStore, or
+# how DataStore should perform under "normal" usage.
+# 
+
 type Customer @model {
 	id: ID! @primaryKey
 	name: String!
@@ -19,4 +26,76 @@ type Product @model {
 	id: ID! @primaryKey
 	sku: String!
 	description: String
+}
+
+#
+# Full-dimension / Completeness models.
+#
+# Attempts to enumerate all possible field, key, model relationship types.
+# Dimensions are:
+#
+# - Model
+# 	- Primary Key -> [Simple, Compound]
+# 
+# - Relationship
+# 	- Specificity -> [Explicit, Implicit]
+# 	- Type -> [HAS_ONE, HAS_MANY, BELONGS_TO]
+#
+
+type HasOneParent @model {
+  id: ID! @primaryKey
+  child: HasOneChild @hasOne
+}
+
+type HasOneChild @model {
+  id: ID! @primaryKey
+  content: String
+}
+
+type DefaultPKParent @model {
+  id: ID! @primaryKey
+  content: String
+  children: [DefaultPKChild] @hasMany
+}
+
+type DefaultPKChild @model {
+  id: ID! @primaryKey
+  content: String
+  parent: DefaultPKParent @belongsTo
+}
+
+type CompositePKParent @model {
+  customId: ID! @primaryKey(sortKeyFields:["content"])
+  content: String!
+  children: [CompositePKChild] @hasMany(indexName:"byParent", fields:["customId", "content"])
+  implicitChildren: [ImplicitChild] @hasMany
+  strangeChildren: [StrangeExplicitChild] @hasMany(indexName: "byCompositePKParentX", fields: ["customId", "content"])
+  childrenSansBelongsTo: [ChildSansBelongsTo] @hasMany
+}
+
+type CompositePKChild @model {
+  childId: ID! @primaryKey(sortKeyFields:["content"])
+  content: String!
+  parent: CompositePKParent @belongsTo(fields:["parentId", "parentTitle"])
+  parentId: ID @index(name: "byParent", sortKeyFields:["parentTitle"])
+  parentTitle: String
+}
+
+type ImplicitChild @model {
+  childId: ID! @primaryKey(sortKeyFields:["content"])
+  content: String!
+  parent: CompositePKParent! @belongsTo
+}
+
+type StrangeExplicitChild @model {
+  strangeId: ID! @primaryKey(sortKeyFields:["content"])
+  content: String!
+  parent: CompositePKParent! @belongsTo(fields:["strangeParentId", "strangeParentTitle"])
+  strangeParentId: ID @index(name: "byCompositePKParentX", sortKeyFields:["strangeParentTitle"])
+  strangeParentTitle: String # customized foreign key for parent sort key
+}
+
+type ChildSansBelongsTo @model {
+  childId: ID! @primaryKey(sortKeyFields:["content"])
+  content: String!
 }

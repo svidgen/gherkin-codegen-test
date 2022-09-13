@@ -29,7 +29,20 @@ module.exports = {
 
 			import { Amplify, DataStore, Predicates } from 'aws-amplify';
 			import awsconfig from './aws-exports';
-			const { Customer, Order, LineItem, Product } = require('./models');
+			const {
+				Customer,
+				Order,
+				LineItem,
+				Product,
+				HasOneParent,
+				DefaultPKParent,
+				DefaultPKChild,
+				CompositePKParent,
+				CompositePKChild,
+				ImplicitChild,
+				StrangeExplicitChild,
+				ChildSansBelongsTo
+			} = require('./models');
 
 			Amplify.configure(awsconfig);
 
@@ -62,7 +75,20 @@ module.exports = {
 	},
 	prologue: `
 		const { Amplify, API, DataStore } = require('aws-amplify');
-		const { Customer, Order, LineItem, Product } = require('./models');
+		const {
+				Customer,
+				Order,
+				LineItem,
+				Product,
+				HasOneParent,
+				DefaultPKParent,
+				DefaultPKChild,
+				CompositePKParent,
+				CompositePKChild,
+				ImplicitChild,
+				StrangeExplicitChild,
+				ChildSansBelongsTo
+		} = require('./models');
 		const mutations = require('./graphql/mutations');
 
 		${helpers}
@@ -99,6 +125,15 @@ module.exports = {
 			const lines = [];
 			for (let i = 0; i < expectedFields.length; i++) {
 				const actual = `${actualRef}.${actualFields[i]}`;
+				const expected = `${expectedRef}.${expectedFields[i]}`;
+				lines.push(`assert.equal(${actual}, ${expected});`);
+			}
+			return lines.join('\n');
+		},
+		expectAwaitedRefFieldsToMatch: ({ actualRef, actualFields, expectedRef, expectedFields }) => {
+			const lines = [];
+			for (let i = 0; i < expectedFields.length; i++) {
+				const actual = `(await ${actualRef}).${actualFields[i]}`;
 				const expected = `${expectedRef}.${expectedFields[i]}`;
 				lines.push(`assert.equal(${actual}, ${expected});`);
 			}

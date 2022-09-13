@@ -22,8 +22,18 @@ module.exports = {
 		datastoreClear: () => 'await DataStore.clear();',
 		datastoreSchema: ({graphql}) => '// schema.json and models go here?',
 		importModels: ({models}) => `const { ${models} } = require('./models');`,
+		objectLiteral: (value) => {
+			const assignments = [];
+			for (const [key, v] of Object.entries(value)) {
+				assignments.push(`${key}: ${v}`);
+			}
+			return `{${assignments.join(',')}}`;
+		},
 		instantiateModel: ({varname, model, value}) => (
 			`const ${varname} = new ${model}(${JSON.stringify(value)});`
+		),
+		instantiateModelWithRef: ({varname, model, ref}) => (
+			`const ${varname} = new ${model}(${ref});`
 		),
 		datastoreSaveFromVariable: ({valueName, returnName}) => (
 			`const ${returnName} = await DataStore.save(${valueName});`
@@ -91,6 +101,16 @@ module.exports = {
 				lines.push(`expect(${actual}).toEqual(${expected});`);
 			}
 			return lines.join('\n');
+		},
+		expectAwaitedRefFieldsToMatch: ({ actualRef, actualFields, expectedRef, expectedFields }) => {
+			const lines = [];
+			for (let i = 0; i < expectedFields.length; i++) {
+				const actual = `(await ${actualRef}).${actualFields[i]}`;
+				const expected = `${expectedRef}.${expectedFields[i]}`;
+				lines.push(`expect(${actual}).toEqual(${expected});`);
+			}
+			return lines.join('\n');
 		}
 	}
 };
+
