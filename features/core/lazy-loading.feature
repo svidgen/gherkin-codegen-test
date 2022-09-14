@@ -5,7 +5,7 @@ Feature: Related model lazy loading
 		Given a configured Amplify context
 		And a clean client database
 
-	Scenario: I can save a parent model (<parent>)
+	Scenario: I can lazy load <child>.parent -> <parent>
 		When I create a new `<parent>` as `parent` with randomized <parentfields>
 		And I save `parent` and return `savedParent`
 		And I create a new `<child>` as `child` with randomized <childfields> and `parent` set to `parent`

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const prettier = require("prettier");
 const { helpers } = require('../lib/js');
 const expectLite= require('./expect-lite');
@@ -5,23 +6,72 @@ const base = require('../js-jest');
 
 module.exports = {
 	...base,
+	init: [
+		'npx create-expo-app .',
+		'npm i ' + [
+			'@expo/webpack-config',
+			'@react-native-async-storage/async-storage',
+			'@react-native-community/netinfo',
+			'aws-amplify',
+			'react-dom@18.0.0',
+			'react-native-web',
+			'react-native-easy-grid'
+		].join(' '),
+	],
+	amplify: {
+		frontend: {
+			frontend: 'javascript',
+		},
+		providers: {
+			awscloudformation: {
+				configLevel: 'project',
+				useProfile: true,
+				profileName: 'wirej',
+			}
+		}
+	},
+	manifests: {
+		'App.js': ({streams}) => fs.readFileSync(`${__dirname}/template/App.js`).toString(),
+		'tests.js': ({streams}) => {
+			const template = fs.readFileSync(`${__dirname}/template/tests.js`).toString()
+			const index = Object.keys(streams).map(name => `
+				(() => {
+					const addTests = require('./${name}');
+					addTests({describe, test, getTestName});
+				})();
+			`).join('\n');
+			return prettier.format(template.replace('// ***** <INDEX /> *****', index), {
+				parser: 'babel'
+			});
+		}
+	},
 	prologue: `
 		import awsconfig from './src/aws-exports';
 		import { Amplify, API, DataStore } from 'aws-amplify';
-		import { BasicModel, Post, Comment } from './src/models';
+		import {
+			Customer,
+			Order,
+			LineItem,
+			Product,
+			HasOneParent,
+			DefaultPKParent,
+			DefaultPKChild,
+			CompositePKParent,
+			CompositePKChild,
+			ImplicitChild,
+			StrangeExplicitChild,
+			ChildSansBelongsTo
+		} from './src/models';
 		import * as mutations from './src/graphql/mutations';
 		
 		${helpers}
 
 		${expectLite}
 
-		describe("spec", () => {
-			afterEach(async () => {
-				await DataStore.clear();
-			});
+		module.exports = ({ describe, test, getTestName }) => {
 		`,
 	epilogue: `
-		});
+		};
 		`,
 	commands: {
 		...base.commands,
@@ -29,7 +79,7 @@ module.exports = {
 		afterEach: ({name}) => '});',
 		configureAmplify: () => 'await Amplify.configure(awsconfig);',
 		datastoreClear: () => 'await DataStore.clear();',
-		importModels: ({models}) => `const { ${models} } = require('./models');`,
+		importModels: ({models}) => `const { ${models} } = require('./src/models');`,
 		expectRefToEqualValue: ({reference, value}) => (
 			`expect(${reference}).toEqual(${JSON.stringify(value)});`
 		),

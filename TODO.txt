@@ -1,0 +1,8 @@
+- add predicate tests
+- pull AWS profile or creds from ENV
+- Android self-test app
+- build parallelization
+- shared backends?
+- targeted builds (be able to build only a single platform/target with --target or something)
+- iOS self-test app
+
