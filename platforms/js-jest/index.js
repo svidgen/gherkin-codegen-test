@@ -38,6 +38,9 @@ module.exports = {
 		datastoreSaveFromVariable: ({valueName, returnName}) => (
 			`const ${returnName} = await DataStore.save(${valueName});`
 		),
+		datastoreDeleteAll: ({model}) => (
+			`await DataStore.delete(${model}, Predicates.ALL);`
+		),
 		datastoreQueryByRef: ({
 			model,
 			inputRef,
@@ -59,7 +62,8 @@ module.exports = {
 				}
 
 				const op = operators.pop();
-				return `("${op}", "${c[op]}")`;
+				// return `("${op}", "${c[op]}")`;
+				return `.${op}(${JSON.stringify(c[op])})`;
 			};
 
 			const build = (p) => {

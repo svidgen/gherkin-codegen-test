@@ -86,6 +86,19 @@ When("I create a new {ref} as {name} with randomized {fields}", (
 	}));
 });
 
+When("I create a new {ref} as {name} with randomized {fields} and {name} set to {string}", (
+	model, varname, fields, prop, setTo
+) => {
+	const value = {};
+	for (const k of fields) {
+		value[k] = JSON.stringify(randomString());
+	}
+	value[prop] = setTo;
+	emit(platform.commands.instantiateModel({
+		varname: normalize(varname), model, value
+	}));
+});
+
 When("I create a new {ref} as {name} with randomized {fields} and {name} set to {ref}", (
 	model, varname, fields, prop, setTo
 ) => {
@@ -106,6 +119,10 @@ When("I save {name} and return {name}", (valueName, returnName) => {
 		returnName: returnName,
 		valueName: valueName
 	}));
+});
+
+When("I delete all existing {name}", (model) => {
+	emit(platform.commands.datastoreDeleteAll({ model }));
 });
 
 When('I query {ref} with {ref} into {name}', (model, inputRef, outputName) => {

@@ -47,7 +47,7 @@ module.exports = {
 	},
 	prologue: `
 		import awsconfig from './src/aws-exports';
-		import { Amplify, API, DataStore } from 'aws-amplify';
+		import { Amplify, API, DataStore, Predicates } from 'aws-amplify';
 		import {
 			Customer,
 			Order,

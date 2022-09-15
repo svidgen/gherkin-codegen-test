@@ -75,7 +75,7 @@ module.exports = {
 		`, { parser: 'babel'})
 	},
 	prologue: `
-		const { Amplify, API, DataStore } = require('aws-amplify');
+		const { Amplify, API, DataStore, Predicates } = require('aws-amplify');
 		const {
 				Customer,
 				Order,
