@@ -98,4 +98,6 @@ type StrangeExplicitChild @model {
 type ChildSansBelongsTo @model {
   childId: ID! @primaryKey(sortKeyFields:["content"])
   content: String!
+  compositePKParentChildrenSansBelongsToCustomId: ID! @index(name: "byParent", sortKeyFields: ["compositePKParentChildrenSansBelongsToContent"])
+  compositePKParentChildrenSansBelongsToContent: String
 }

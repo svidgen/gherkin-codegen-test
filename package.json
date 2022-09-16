@@ -4,15 +4,17 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-	"clean": "node clean.js",
-    "build": "node main.js",
-    "rebuild": "yarn clean && node main.js",
-    "test": "cucumber-js"
+    "clean": "node clean.js",
+    "build": "node build.js",
+    "rebuild": "yarn clean && node build.js",
+    "test": "cucumber-js",
+	"start": "node start.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@cucumber/cucumber": "^8.2.2",
+    "cli-select": "^1.1.2",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2"
   }
