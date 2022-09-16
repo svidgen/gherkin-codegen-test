@@ -8,7 +8,8 @@
     "build": "node build.js",
     "rebuild": "yarn clean && node build.js",
     "test": "cucumber-js",
-	"start": "node start.js"
+	"start": "node start.js",
+	"code": "node code.js"
   },
   "author": "",
   "license": "ISC",
