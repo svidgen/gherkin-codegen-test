@@ -29,11 +29,24 @@ module.exports = {
 			}
 			return `{${assignments.join(',')}}`;
 		},
+		beginTrying: () => `try {`,
+		catchAndAssertMatch: ({message}) => (
+			`} catch (error) {
+				// TODO
+			}`
+		),
 		instantiateModel: ({varname, model, value}) => (
 			`const ${varname} = new ${model}(${JSON.stringify(value)});`
 		),
 		instantiateModelWithRef: ({varname, model, ref}) => (
 			`const ${varname} = new ${model}(${ref});`
+		),
+		datastoreModelCopy: ({model, fromName, toName, updates}) => (
+			`const ${toName} = ${model}.copyOf(${fromName}, draft => {
+				${Object.entries(updates).map(([key, value]) => {
+					`draft[${key}] = JSON.stringify(${value});`
+				})}
+			});`
 		),
 		datastoreSaveFromVariable: ({valueName, returnName}) => (
 			`const ${returnName} = await DataStore.save(${valueName});`
@@ -93,6 +106,9 @@ module.exports = {
 		),
 		expectRefLengthToBe: ({reference, length}) => (
 			`expect(${reference}.length).toBe(${length});`
+		),
+		expectObjectsTomatch: ({value, expected}) => (
+			`expect(${value}).toMatch(${expectedValueRef});`
 		),
 		expectFirstItemToMatchRef: ({reference, expectedValueRef}) => (
 			`expect(${reference}[0]).toMatch(${expectedValueRef});`

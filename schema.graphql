@@ -52,6 +52,18 @@ type HasOneChild @model {
   content: String
 }
 
+type MtmLeft @model {
+  id: ID! @primaryKey
+  content: String
+  rightOnes: [MtmRight] @manyToMany
+}
+
+type MtmRight @model {
+  id: ID! @primaryKey
+  content: String
+  leftOnes: [MtmLeft] @manyToMany
+}
+
 type DefaultPKParent @model {
   id: ID! @primaryKey
   content: String

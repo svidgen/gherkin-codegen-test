@@ -75,4 +75,35 @@ Feature: Core Use
 			| Customer | { "name": "George" } | { "name": { "eq": "George" } } |
 			| Customer | { "name": "Jeff" }   | { "name": { "eq": "Jeff" } }   |
 
-
+			# 	Scenario: I can save a model conditionally with a predicate.
+			# 		When I create a new `Customer` as `original` with args
+			# 		"""
+			# 		{"name": "William"}
+			# 		"""
+			# 		And I save `original` and return `saved`
+			# 		And I copy `Customer` `saved` into `updated` with 
+			# 		"""
+			# 		{"name": "Bill"}
+			# 		"""
+			# 		And I save `updated` and return `savedUpdate` with predicate
+			# 		"""
+			# 		{"name": {"eq": "William"}}
+			# 		"""
+			# 		Then `savedUpdate` should match `updated`
+			# 
+			# 	Scenario: I get an error saving a model conditionally with a bad predicate.
+			# 		When I create a new `Customer` as `original` with args
+			# 		"""
+			# 		{"name": "William"}
+			# 		"""
+			# 		And I save `original` and return `saved`
+			# 		And I copy `Customer` `saved` into `updated` with 
+			# 		"""
+			# 		{"name": "Bill"}
+			# 		"""
+			# 		Then I expect an error
+			# 		When I save `updated` and return `savedUpdate` with predicate
+			# 		"""
+			# 		{"name": {"eq": "NOT WILLIAM"}}
+			# 		"""
+			# 		And the error message should match "whatever"

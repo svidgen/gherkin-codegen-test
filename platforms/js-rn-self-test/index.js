@@ -12,7 +12,7 @@ module.exports = {
 			'@expo/webpack-config',
 			'@react-native-async-storage/async-storage',
 			'@react-native-community/netinfo',
-			'aws-amplify',
+			'aws-amplify@next',
 			'react-dom@18.0.0',
 			'react-native-web',
 			'react-native-easy-grid'

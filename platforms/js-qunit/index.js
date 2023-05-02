@@ -6,8 +6,8 @@ module.exports = {
 	...js_jest,
 	init: [
 		'npx create-react-app .',
-		'npm i aws-amplify qunit',
-		'yarn link @aws-amplify/datastore @aws-amplify/api @aws-amplify/core'
+		'npm i aws-amplify@next qunit',
+		// 'yarn link @aws-amplify/datastore @aws-amplify/api @aws-amplify/core'
 	],
 	specDirectory: 'src',
 	amplify: {

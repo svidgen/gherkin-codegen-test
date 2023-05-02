@@ -1,11 +1,11 @@
 Feature: Related model nested predicates
-	Defines and demonstrates how nested predicates on related models should work.
+	Predicates should allow you to query a model based on attributes of related models, including related entities of related models.
 
 	Background:
 		Given a configured Amplify context
 		And a clean client database
 
-	Scenario: I can query() <child>.(parent as <parent>).content conditions
+	Scenario: I can query(<child>) where child's <parent> parent.content.eq(parent content).
 		When I delete all existing `<parent>`
 		And I delete all existing `<child>`
 		When I create a new `<parent>` as `parent` with randomized <parentfields> and `content` set to "predictable content"

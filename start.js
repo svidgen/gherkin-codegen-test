@@ -15,7 +15,7 @@ const platforms = require('./platforms');
 	// TODO: pull this command from `platforms`
 	execSync(platforms[platform].startCommand || `yarn start`, {
 		stdio: [
-			'ignore',
+			'inherit',
 			'inherit',
 			'inherit'
 		]

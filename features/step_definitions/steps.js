@@ -121,6 +121,23 @@ When("I save {name} and return {name}", (valueName, returnName) => {
 	}));
 });
 
+When("I save {name} and return {name} with predicate", (valueName, returnName, json) => {
+	emit(platform.commands.datastoreSaveWithPredicate({
+		valueName,
+		returnName,
+		predicate: JSON.parse(json)
+	}));
+});
+
+When("I copy {ref} {ref} into {name} with", (model, fromName, toName, json) => {
+	emit(platform.commands.datastoreModelCopy({
+		model,
+		fromName,
+		toName,
+		updates: JSON.parse(json)
+	}));
+});
+
 When("I delete all existing {name}", (model) => {
 	emit(platform.commands.datastoreDeleteAll({ model }));
 });
@@ -161,6 +178,13 @@ Then('{ref} should be a list of {int}', (reference, length) => {
 	}));
 });
 
+Then('{name} should match {name}', (value, expected) => {
+	emit(platform.commands.expectObjectsToMatch({
+		value,
+		expected
+	}));
+});
+
 Then('the first item of {ref} should match {ref}', (reference, expectedValueRef) => {
 	emit(platform.commands.expectFirstItemToMatchRef({
 		reference,
@@ -194,4 +218,13 @@ Then('awaited {ref} {fields} should match {ref} {fields}', (
 		expectedRef,
 		expectedFields
 	}));
+});
+
+Then('I expect an error', (
+) => {
+	emit(platform.commands.beginTrying());
+});
+
+Then('the error message should match {string}', message => {
+	emit(platform.commands.catchAndAssertMatch({message}));
 });
